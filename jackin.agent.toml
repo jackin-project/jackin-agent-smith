@@ -1,0 +1,7 @@
+dockerfile = "Dockerfile"
+
+[claude]
+plugins = [
+  "code-review@claude-plugins-official",
+  "feature-dev@claude-plugins-official",
+]
