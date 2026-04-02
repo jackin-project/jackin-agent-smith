@@ -1,5 +1,8 @@
 dockerfile = "Dockerfile"
 
+[identity]
+name = "Agent Smith"
+
 [claude]
 plugins = [
   "code-review@claude-plugins-official",
