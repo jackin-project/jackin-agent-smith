@@ -17,3 +17,7 @@ For v1, `agent-smith` intentionally stays minimal:
 - shared shell/runtime tools come from `jackin/construct:trixie`
 - this repo preinstalls `node@lts`
 - runtime workspace is the repo itself, mounted at `/workspace`
+
+## License
+
+This project is licensed under the [Apache License 2.0](LICENSE).
