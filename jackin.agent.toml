@@ -3,6 +3,9 @@ dockerfile = "Dockerfile"
 [identity]
 name = "Agent Smith"
 
+[env.CLAUDE_CODE_NO_FLICKER]
+default = "1"
+
 [claude]
 plugins = [
   "code-review@claude-plugins-official",
