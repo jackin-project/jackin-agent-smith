@@ -1,6 +1,6 @@
 # AGENTS.md — jackin-agent-smith
 
-A Claude Code agent image extending `projectjackin/construct:trixie`. Layers Node.js on top of the construct base. Consumed by operators running `jackin` who want an "Agent Smith" personality with the `code-review` and `feature-dev` plugins pre-configured.
+A Claude Code agent image extending `projectjackin/construct:trixie` with the `code-review` and `feature-dev` plugins pre-configured for code-review-focused work. Layers Node.js on top of the construct base.
 
 **Image distribution is public** (published to a registry); any user pulling it runs exactly what this Dockerfile builds. Baked-in secrets leak to every puller.
 
@@ -39,7 +39,7 @@ git diff --cached --name-only -z | xargs -0 -r \
 ## Conventions
 
 - Branch naming: `chore/*`, `feat/*`, `fix/*`
-- Commit messages follow Conventional Commits
+- Commit messages: see [Commit Messages](#commit-messages) section below
 - `main` is the primary branch
 - All changes go through PR
 
@@ -48,3 +48,31 @@ git diff --cached --name-only -z | xargs -0 -r \
 - A compromised `projectjackin/construct` base image — trust anchored there, not here. If that image adds a malicious layer, this image inherits it.
 - Compromised plugins from `@claude-plugins-official` — trust anchored in the marketplace, not here.
 - An operator mounting secrets into a running container that a plugin exfiltrates — runtime hygiene is outside this image's scope.
+
+## Commit Messages
+
+All commits in this repository MUST follow [Conventional Commits 1.0.0](https://www.conventionalcommits.org/en/v1.0.0/).
+
+Subject format: `<type>[optional scope][!]: <description>`
+
+Allowed types:
+
+| Type       | Use for                                                |
+| ---------- | ------------------------------------------------------ |
+| `feat`     | New user-visible feature                               |
+| `fix`      | Bug fix                                                |
+| `docs`     | Documentation-only change                              |
+| `style`    | Formatting, whitespace; no logic change                |
+| `refactor` | Internal restructuring; no behavior change             |
+| `perf`     | Performance improvement                                |
+| `test`     | Adding or updating tests                               |
+| `build`    | Build system, tooling, dependencies                    |
+| `ci`       | CI configuration                                       |
+| `chore`    | Routine maintenance (release, merge, deps)             |
+| `revert`   | Reverts a prior commit                                 |
+
+Scope is optional but encouraged when it clarifies the change area.
+
+Breaking changes use `!` after the type/scope (`feat!:` or `feat(api)!:`) and include a `BREAKING CHANGE:` footer in the body.
+
+PR squash-merge: the PR title becomes the commit subject, so PR titles must also follow this convention.
