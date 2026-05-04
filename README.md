@@ -7,7 +7,7 @@ It provides only the agent-specific environment layer for `jackin`, not the fina
 ## Contract
 
 - final Dockerfile stage must literally be `FROM projectjackin/construct:trixie`
-- plugins are declared in `jackin.agent.toml`
+- plugins are declared in `jackin.role.toml`
 - the repo is expected to run cleanly without company-specific secrets, custom CA setup, or private mirrors
 
 ## Environment

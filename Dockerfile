@@ -2,7 +2,7 @@ FROM projectjackin/construct:trixie
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
-USER claude
+USER agent
 
 ENV MISE_TRUSTED_CONFIG_PATHS=/workspace
 
