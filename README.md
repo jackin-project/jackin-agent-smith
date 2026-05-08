@@ -1,22 +1,33 @@
-# agent-smith
+# Agent Smith
 
-`agent-smith` is the first public-friendly `jackin` agent repo.
+**Agent Smith** is a public-friendly `jackin` agent role for code review (role identifier `agent-smith`). It provides only the agent-specific environment layer for `jackin`, not the final Claude runtime.
 
-It provides only the agent-specific environment layer for `jackin`, not the final Claude runtime. `jackin` validates this repo's Dockerfile, derives the final image itself, and mounts the cached repo checkout into `/workspace` when you run `jackin load agent-smith`.
+`jackin` validates this repo's Dockerfile, derives the final image itself, and mounts the cached repo checkout into `/workspace` when you run:
+
+```sh
+jackin load agent-smith
+```
 
 ## Contract
 
-- final Dockerfile stage must literally be `FROM projectjackin/construct:trixie`
-- plugins are declared in `jackin.role.toml`
-- the repo is expected to run cleanly without company-specific secrets, custom CA setup, or private mirrors
+- Final Dockerfile stage must literally be `FROM projectjackin/construct:trixie`
+- Plugins are declared in `jackin.role.toml`
+- The repo is expected to run cleanly without company-specific secrets, custom CA setup, or private mirrors
+- Threat model and hard rules: see [AGENTS.md](./AGENTS.md)
 
 ## Environment
 
-For v1, `agent-smith` intentionally stays minimal:
+Agent Smith intentionally stays minimal:
 
-- shared shell/runtime tools come from `jackin/construct:trixie`
-- this repo preinstalls `node@lts`
-- runtime workspace is the repo itself, mounted at `/workspace`
+- **Node.js** LTS (via mise)
+- Shared shell/runtime tools come from `projectjackin/construct:trixie`
+- Runtime workspace is the repo itself, mounted at `/workspace`
+
+## Plugins
+
+Declared in [`jackin.role.toml`](./jackin.role.toml) under `[claude].plugins` and bootstrapped at runtime by jackin. All plugins come from the default `@claude-plugins-official` marketplace; no third-party marketplaces are used.
+
+Trust rationale: see [AGENTS.md § Threat model](./AGENTS.md#threat-model).
 
 ## License
 
