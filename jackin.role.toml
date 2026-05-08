@@ -1,14 +1,15 @@
 dockerfile = "Dockerfile"
 published_image = "docker.io/projectjackin/jackin-agent-smith:latest"
+agents = ["claude"]
 
 [identity]
 name = "Agent Smith"
-
-[env.CLAUDE_CODE_NO_FLICKER]
-default = "1"
 
 [claude]
 plugins = [
   "code-review@claude-plugins-official",
   "feature-dev@claude-plugins-official",
 ]
+
+[env.CLAUDE_CODE_NO_FLICKER]
+default = "1"
