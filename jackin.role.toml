@@ -1,7 +1,7 @@
+version = "v1alpha1"
 dockerfile = "Dockerfile"
 published_image = "docker.io/projectjackin/jackin-agent-smith:latest"
 agents = ["claude"]
-version = "v1alpha1"
 
 [identity]
 name = "Agent Smith"
