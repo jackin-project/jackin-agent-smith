@@ -11,7 +11,7 @@ USER agent
 
 ENV MISE_TRUSTED_CONFIG_PATHS=/workspace
 
-RUN --mount=type=secret,id=github_token,required=false \
+RUN --mount=type=secret,id=github_token,mode=0444,required=false \
     GITHUB_TOKEN=$(cat /run/secrets/github_token 2>/dev/null || true) \
     mise install node@lts && \
     mise use -g --pin node@lts
