@@ -1,0 +1,3 @@
+# DL3004: construct base image is a dev container that intentionally exposes sudo
+ignore:
+  - DL3004
