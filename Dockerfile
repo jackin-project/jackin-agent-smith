@@ -11,10 +11,12 @@ USER agent
 
 ENV MISE_TRUSTED_CONFIG_PATHS=/workspace
 
+ARG NODE_VERSION=24.15.0
+
 RUN --mount=type=secret,id=github_token,uid=1000,required=false \
     GITHUB_TOKEN=$(cat /run/secrets/github_token 2>/dev/null || true) \
-    mise install node@lts && \
-    mise use -g --pin node@lts
+    mise install "node@${NODE_VERSION}" && \
+    mise use -g --pin "node@${NODE_VERSION}"
 
 # ARG ROLE_GIT_SHA is declared here (after all tool layers) so that a
 # per-commit SHA change does not invalidate the expensive tool cache layers above.
