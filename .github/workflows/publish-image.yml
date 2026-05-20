@@ -11,11 +11,11 @@ on:
 
 jobs:
   publish:
-    uses: jackin-project/jackin-role-action/.github/workflows/publish.yml@d8296b04eba14ccbefe0b2c52fb88c81ce1a8911 # latest
+    uses: jackin-project/jackin-role-action/.github/workflows/publish.yml@e85fdf930c66a1d4bc8f491cf47df78b26608678 # latest
     permissions:
       contents: read
       id-token: write
     secrets:
       registry-username: ${{ secrets.DOCKERHUB_USERNAME }}
       registry-password: ${{ secrets.DOCKERHUB_TOKEN }}
-      gh-readonly-token: ${{ secrets.GH_READONLY_TOKEN }}
+      github-readonly-token: ${{ secrets.GH_READONLY_TOKEN }}
