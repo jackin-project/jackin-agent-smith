@@ -13,7 +13,9 @@
   "customManagers": [
     {
       "customType": "regex",
-      "fileMatch": ["(^|/)Dockerfile$"],
+      "managerFilePatterns": [
+        "/(^|/)Dockerfile$/"
+      ],
       "matchStrings": ["ARG NODE_VERSION=(?<currentValue>[\\d.]+)"],
       "datasourceTemplate": "node-version",
       "packageNameTemplate": "node"
