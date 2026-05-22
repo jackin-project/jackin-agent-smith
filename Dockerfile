@@ -6,7 +6,7 @@ USER agent
 
 ENV MISE_TRUSTED_CONFIG_PATHS=/workspace
 
-ARG NODE_VERSION=24.15.0
+ARG NODE_VERSION=24.16.0
 
 RUN --mount=type=secret,id=github_token,uid=1000,required=false \
     GITHUB_TOKEN=$(cat /run/secrets/github_token 2>/dev/null || true) \
