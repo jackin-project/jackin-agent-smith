@@ -14,13 +14,12 @@ on:
         default: github
         options: [github, velnor, both]
 
-permissions:
-  contents: read
-
 jobs:
   matrix-setup:
     name: Select runner lane
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     outputs:
       configs: ${{ steps.set.outputs.configs }}
     steps:
@@ -45,6 +44,8 @@ jobs:
       matrix:
         config: ${{ fromJSON(needs.matrix-setup.outputs.configs) }}
     runs-on: ${{ fromJSON(matrix.config.runner) }}
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
       - uses: jackin-project/jackin-role-action@918e0958a2f695087b8e262ed90d3ed7c09c787a # latest
