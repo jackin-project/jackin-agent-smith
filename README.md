@@ -10,7 +10,7 @@ jackin load agent-smith
 
 ## Contract
 
-- Final Dockerfile stage must literally be `FROM projectjackin/construct:trixie`
+- Final Dockerfile stage must use the digest-pinned `projectjackin/construct:<version>-trixie` base.
 - Plugins are declared in `jackin.role.toml`
 - The repo is expected to run cleanly without company-specific secrets, custom CA setup, or private mirrors
 - Threat model and hard rules: see [AGENTS.md](./AGENTS.md)
@@ -20,7 +20,7 @@ jackin load agent-smith
 Agent Smith intentionally stays minimal:
 
 - **Node.js** LTS (via mise)
-- Shared shell/runtime tools come from `projectjackin/construct:trixie`
+- Shared shell/runtime tools come from the digest-pinned construct base.
 - Runtime workspace is the repo itself, mounted at `/workspace`
 
 ## Plugins
