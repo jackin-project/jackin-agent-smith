@@ -1,4 +1,4 @@
-version = "v1alpha3"
+version = "v1alpha4"
 dockerfile = "Dockerfile"
 published_image = "docker.io/projectjackin/jackin-agent-smith:latest"
 agents = ["claude"]
@@ -7,6 +7,7 @@ agents = ["claude"]
 name = "Agent Smith"
 
 [claude]
+model = "claude-sonnet-4-6"
 plugins = [
   "code-review@claude-plugins-official",
   "feature-dev@claude-plugins-official",
@@ -14,3 +15,6 @@ plugins = [
 
 [env.CLAUDE_CODE_NO_FLICKER]
 default = "1"
+
+[env.CLAUDE_CODE_MAX_OUTPUT_TOKENS]
+default = "64000"

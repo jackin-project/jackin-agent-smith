@@ -1,6 +1,6 @@
 # AGENTS.md — jackin-agent-smith
 
-A public-friendly Claude Code agent image for code review. Extends `projectjackin/construct:trixie` with the `code-review` and `feature-dev` plugins pre-configured. Layers Node.js on top of the construct base.
+A public-friendly Claude Code agent image for code review. Extends the digest-pinned `projectjackin/construct:<version>-trixie` base with the `code-review` and `feature-dev` plugins pre-configured. Layers Node.js on top of the construct base.
 
 **Image distribution is public** (published to a registry); any user pulling it runs exactly what this Dockerfile builds. Baked-in secrets leak to every puller.
 
@@ -8,7 +8,7 @@ A public-friendly Claude Code agent image for code review. Extends `projectjacki
 
 Threat surface for this image:
 
-1. **Base image supply chain.** `FROM projectjackin/construct:trixie` — whoever can push to `projectjackin/construct` serves the base. The `trixie` tag is mutable; pinning by digest would harden this but breaks the monthly base-image refresh flow.
+1. **Base image supply chain.** `projectjackin/construct:<version>-trixie` is pinned by digest in the Dockerfile. Whoever can push to `projectjackin/construct` still serves the base image, so digest refreshes require review.
 2. **Build-time tool pulls.** `mise install node@lts` hits mise's registry to resolve "lts" at build time. If mise's registry or the pulled Node.js tarball is compromised between releases, this image inherits the compromise.
 3. **Runtime credential exposure.** The image itself holds no credentials, but operators mount their `~/.config/gh/hosts.yml`, Claude Code auth, and sometimes SSH keys into the container at run time. Any plugin or tool running inside has access. The Dockerfile must not cache these paths, ENV them, or bake them into layers.
 4. **Layer secrets.** `--build-arg` or `ENV` of sensitive values bakes them into the image, retrievable via `docker history`. Currently none are used; any addition requires review.
@@ -16,7 +16,7 @@ Threat surface for this image:
 
 ## Hard rules (do not break these)
 
-1. **Final stage must be `FROM projectjackin/construct:trixie`.** This is the contract jackin enforces; breaking it makes the role unloadable.
+1. **Final stage must use a digest-pinned `projectjackin/construct:<version>-trixie` base.** This is the contract jackin enforces; breaking it makes the role unloadable.
 2. **Never add a plugin without documenting its trust anchor.** Marketplace name alone is insufficient — note in the PR why the specific plugin is trusted. Third-party plugins are lateral attack surface.
 3. **Never `ENV GITHUB_TOKEN=...` or any credential ENV.** No `ARG GITHUB_TOKEN=...`, no `COPY ~/.secrets/...`. Credentials come from the operator's shell at run time.
 4. **No build-time secrets in plain `ARG` / `ENV`.** If a step ever needs a secret, use `--mount=type=secret`.
