@@ -6,7 +6,7 @@ USER agent
 
 ENV MISE_TRUSTED_CONFIG_PATHS=/workspace
 
-ARG NODE_VERSION=24.16.0
+ARG NODE_VERSION=24.17.0
 
 RUN mkdir -p "${HOME}/.cache/mise"
 
