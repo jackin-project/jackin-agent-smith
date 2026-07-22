@@ -14,9 +14,6 @@ on:
         default: velnor
         options: [velnor, github, both]
 
-permissions:
-  contents: read
-
 concurrency:
   group: gitleaks-history-${{ github.ref }}
   cancel-in-progress: false
@@ -24,6 +21,8 @@ concurrency:
 jobs:
   scan:
     name: Gitleaks history (${{ matrix.config.lane }})
+    permissions:
+      contents: read
     timeout-minutes: 15
     strategy:
       fail-fast: false
@@ -47,6 +46,7 @@ jobs:
     needs: [scan]
     if: always()
     name: Gitleaks required (${{ matrix.config.lane }})
+    permissions: {}
     timeout-minutes: 5
     strategy:
       fail-fast: false
