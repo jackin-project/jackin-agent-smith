@@ -17,18 +17,15 @@ on:
     branches: [main]
   workflow_dispatch:
     inputs:
-      lane:
-        description: |
-          Runner lane. Publish mutates registry state, so it runs on one
-          lane: velnor (default), github, or both. In both mode Velnor is
-          the sole publisher and GitHub performs a read-only parity build.
+      lanes:
+        description: velnor (default) | github | both
         type: choice
         default: velnor
         options: [velnor, github, both]
 
 jobs:
   publish-velnor:
-    if: github.event_name != 'workflow_dispatch' || inputs.lane == 'velnor' || inputs.lane == 'both'
+    if: github.event_name != 'workflow_dispatch' || inputs.lanes == 'velnor' || inputs.lanes == 'both'
     uses: jackin-project/jackin-role-action/.github/workflows/publish.yml@f3a55713333df77f08d8d783f0f6035a6bea7996 # pinned
     permissions:
       contents: read
@@ -46,7 +43,7 @@ jobs:
       github-readonly-token: ${{ secrets.GH_READONLY_TOKEN }}
 
   publish-github:
-    if: github.event_name == 'workflow_dispatch' && (inputs.lane == 'github' || inputs.lane == 'both')
+    if: github.event_name == 'workflow_dispatch' && (inputs.lanes == 'github' || inputs.lanes == 'both')
     uses: jackin-project/jackin-role-action/.github/workflows/publish.yml@f3a55713333df77f08d8d783f0f6035a6bea7996 # pinned
     permissions:
       contents: read
@@ -55,8 +52,28 @@ jobs:
       runner-amd64: ubuntu-26.04
       runner-arm64: ubuntu-26.04-arm
       runner-merge: ubuntu-26.04
-      publish: ${{ inputs.lane == 'github' }}
+      # Publish mutates registry state, so Velnor is the sole publisher; the
+      # GitHub lane performs a read-only parity build except on a github-only
+      # dispatch, where it becomes the publishing lane.
+      publish: ${{ inputs.lanes == 'github' }}
     secrets:
       registry-username: ${{ secrets.DOCKERHUB_USERNAME }}
       registry-password: ${{ secrets.DOCKERHUB_TOKEN }}
       github-readonly-token: ${{ secrets.GH_READONLY_TOKEN }}
+
+  # Single stable gate over both reusable calls; also gives this workflow a
+  # literal Velnor runs-on so the runner-default audit sees the fleet default.
+  publish-required:
+    name: Publish required
+    needs: [publish-velnor, publish-github]
+    if: always()
+    permissions: {}
+    # Headroom for fleet admission/finalization: the gate itself takes seconds,
+    # but short timeouts previously killed queued jobs while the fleet was
+    # saturated by simultaneous merges.
+    timeout-minutes: 15
+    runs-on: [self-hosted, velnor-target-mvp]
+    steps:
+      - env:
+          NEEDS_JSON: ${{ toJSON(needs) }}
+        run: echo "$NEEDS_JSON" | jq -e '[to_entries[].value.result] as $r | ($r | any(. == "failure" or . == "cancelled") | not) and ($r | any(. == "success"))' >/dev/null
