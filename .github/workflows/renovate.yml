@@ -21,16 +21,18 @@ concurrency:
   cancel-in-progress: false
 
 # Both lanes run the SAME steps with the SAME toolchain; only runs-on differs.
-# Renovate mutates repository state, so exactly one lane writes: Velnor writes
-# by default; in "both" mode the GitHub lane is a read-only comparison; a
-# github-only dispatch makes the GitHub lane the writer. The GitHub-hosted
-# label lives in the matrix include so that no runs-on line carries a
-# GitHub-hosted literal: Velnor is the only literal runner default.
+# Fleet admission rejects post-merge push jobs on Velnor (merged_push_occupancy)
+# so open PRs keep the fleet, therefore push events route to the GitHub lane;
+# schedule and dispatch default to Velnor. Renovate mutates repository state,
+# so exactly one lane writes: the single running lane writes; in "both" mode
+# Velnor writes and the GitHub lane is a read-only comparison. The
+# GitHub-hosted label lives in the matrix include so that no runs-on line
+# carries a GitHub-hosted literal: Velnor is the only literal runner default.
 
 jobs:
   renovate:
     name: Renovate (Velnor)
-    if: ${{ github.event_name != 'workflow_dispatch' || inputs.lanes != 'github' }}
+    if: ${{ github.event_name != 'push' && (github.event_name != 'workflow_dispatch' || inputs.lanes != 'github') }}
     permissions:
       contents: read
     timeout-minutes: 30
@@ -75,7 +77,7 @@ jobs:
 
   renovate-github:
     name: Renovate (GitHub)
-    if: ${{ github.event_name == 'workflow_dispatch' && inputs.lanes != 'velnor' }}
+    if: ${{ github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.lanes != 'velnor') }}
     permissions:
       contents: read
     timeout-minutes: 30
@@ -87,7 +89,7 @@ jobs:
     runs-on: ${{ matrix.runner }}
     env:
       RENOVATE_TOKEN: ${{ secrets.RENOVATE_TOKEN }}
-      RENOVATE_WRITER: ${{ inputs.lanes == 'both' && 'false' || 'true' }}
+      RENOVATE_WRITER: ${{ github.event_name == 'workflow_dispatch' && inputs.lanes == 'both' && 'false' || 'true' }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -125,7 +127,10 @@ jobs:
 
   renovate-required:
     needs: [renovate, renovate-github]
-    if: always()
+    # On push a single GitHub-lane job runs and is itself the check; the gate
+    # aggregates lanes for every other event. Velnor-labeled jobs must not run
+    # on push (merged_push_occupancy), so the gate skips push.
+    if: ${{ always() && github.event_name != 'push' }}
     name: Renovate required (Velnor)
     permissions: {}
     # Headroom for fleet admission/finalization: the gate itself takes seconds,

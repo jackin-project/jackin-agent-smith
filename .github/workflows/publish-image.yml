@@ -23,9 +23,15 @@ on:
         default: velnor
         options: [velnor, github, both]
 
+# Fleet admission rejects post-merge push jobs on Velnor (merged_push_occupancy)
+# so open PRs keep the fleet, therefore push events publish from the GitHub
+# lane; dispatches default to the Velnor lane. Publish mutates registry state,
+# so exactly one lane publishes per run: in "both" mode Velnor is the sole
+# publisher and GitHub performs a read-only parity build.
+
 jobs:
   publish-velnor:
-    if: github.event_name != 'workflow_dispatch' || inputs.lanes == 'velnor' || inputs.lanes == 'both'
+    if: github.event_name != 'push' && (github.event_name != 'workflow_dispatch' || inputs.lanes == 'velnor' || inputs.lanes == 'both')
     uses: jackin-project/jackin-role-action/.github/workflows/publish.yml@f3a55713333df77f08d8d783f0f6035a6bea7996 # pinned
     permissions:
       contents: read
@@ -43,7 +49,7 @@ jobs:
       github-readonly-token: ${{ secrets.GH_READONLY_TOKEN }}
 
   publish-github:
-    if: github.event_name == 'workflow_dispatch' && (inputs.lanes == 'github' || inputs.lanes == 'both')
+    if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && (inputs.lanes == 'github' || inputs.lanes == 'both'))
     uses: jackin-project/jackin-role-action/.github/workflows/publish.yml@f3a55713333df77f08d8d783f0f6035a6bea7996 # pinned
     permissions:
       contents: read
@@ -52,10 +58,7 @@ jobs:
       runner-amd64: ubuntu-26.04
       runner-arm64: ubuntu-26.04-arm
       runner-merge: ubuntu-26.04
-      # Publish mutates registry state, so Velnor is the sole publisher; the
-      # GitHub lane performs a read-only parity build except on a github-only
-      # dispatch, where it becomes the publishing lane.
-      publish: ${{ inputs.lanes == 'github' }}
+      publish: ${{ github.event_name == 'push' || inputs.lanes == 'github' }}
     secrets:
       registry-username: ${{ secrets.DOCKERHUB_USERNAME }}
       registry-password: ${{ secrets.DOCKERHUB_TOKEN }}
@@ -63,10 +66,13 @@ jobs:
 
   # Single stable gate over both reusable calls; also gives this workflow a
   # literal Velnor runs-on so the runner-default audit sees the fleet default.
+  # On push a single GitHub-lane call runs and is itself the check, and
+  # Velnor-labeled jobs must not run on push (merged_push_occupancy), so the
+  # gate skips push.
   publish-required:
     name: Publish required
     needs: [publish-velnor, publish-github]
-    if: always()
+    if: ${{ always() && github.event_name != 'push' }}
     permissions: {}
     # Headroom for fleet admission/finalization: the gate itself takes seconds,
     # but short timeouts previously killed queued jobs while the fleet was

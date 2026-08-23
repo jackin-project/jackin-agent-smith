@@ -18,13 +18,16 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 # Both lanes run the SAME steps with the SAME toolchain; only runs-on differs.
-# The GitHub-hosted label lives in the matrix include so that no runs-on line
-# carries a GitHub-hosted literal: Velnor is the only literal runner default.
+# Fleet admission rejects post-merge push jobs on Velnor (merged_push_occupancy)
+# so open PRs keep the fleet, therefore push events route to the GitHub lane;
+# every other event defaults to Velnor. The GitHub-hosted label lives in the
+# matrix include so that no runs-on line carries a GitHub-hosted literal:
+# Velnor is the only literal runner default.
 
 jobs:
   reuse:
     name: REUSE (Velnor)
-    if: ${{ github.event_name != 'workflow_dispatch' || inputs.lanes != 'github' }}
+    if: ${{ github.event_name != 'push' && (github.event_name != 'workflow_dispatch' || inputs.lanes != 'github') }}
     runs-on: [self-hosted, velnor-target-mvp]
     timeout-minutes: 10
     steps:
@@ -42,7 +45,7 @@ jobs:
 
   reuse-github:
     name: REUSE (GitHub)
-    if: ${{ github.event_name == 'workflow_dispatch' && inputs.lanes != 'velnor' }}
+    if: ${{ github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.lanes != 'velnor') }}
     strategy:
       fail-fast: false
       matrix:
