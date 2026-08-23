@@ -32,7 +32,7 @@ on:
 jobs:
   publish-velnor:
     if: github.event_name != 'push' && (github.event_name != 'workflow_dispatch' || inputs.lanes == 'velnor' || inputs.lanes == 'both')
-    uses: jackin-project/jackin-role-action/.github/workflows/publish.yml@2ad5dea9259ce2fe8aef743603cb560f86efa46a # pinned
+    uses: jackin-project/jackin-role-action/.github/workflows/publish.yml@411b2508d5a0e741a3e89430532f5393b751467c # pinned
     permissions:
       contents: read
       id-token: write
@@ -50,7 +50,7 @@ jobs:
 
   publish-github:
     if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && (inputs.lanes == 'github' || inputs.lanes == 'both'))
-    uses: jackin-project/jackin-role-action/.github/workflows/publish.yml@2ad5dea9259ce2fe8aef743603cb560f86efa46a # pinned
+    uses: jackin-project/jackin-role-action/.github/workflows/publish.yml@411b2508d5a0e741a3e89430532f5393b751467c # pinned
     permissions:
       contents: read
       id-token: write
