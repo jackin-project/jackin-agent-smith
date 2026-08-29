@@ -17,14 +17,14 @@ concurrency:
   cancel-in-progress: true
 
 # Both lanes run the SAME steps with the SAME toolchain; only runs-on differs.
-# The GitHub-hosted label lives in the matrix include so that no runs-on line
-# carries a GitHub-hosted literal: Velnor is the only literal runner default.
+# pull_request routes to the GitHub lane (ubuntu-26.04) so PR checks never wait
+# on the self-hosted fleet; workflow_dispatch keeps Velnor as the default lane.
 
 jobs:
   reuse:
     name: REUSE (Velnor)
     if: ${{ github.event_name != 'workflow_dispatch' || inputs.lanes != 'github' }}
-    runs-on: [self-hosted, velnor-target-mvp]
+    runs-on: ${{ github.event_name == 'pull_request' && 'ubuntu-26.04' || fromJSON('["self-hosted","velnor-target-mvp"]') }}
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
