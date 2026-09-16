@@ -3,7 +3,7 @@ schema = 1
 repository = "jackin-project/jackin-agent-smith"
 revision = "5623be5539f2a378430fdcc7d4ba5cb13b5f1222"
 [policy]
-ruleset_required_status_checks = ["ci-required"]
+ruleset_required_status_checks = ["ci-required", "Control / Planning", "Control / Required"]
 ruleset_external_status_checks = ["DCO"]
 [workflow]
 runners = "github"
