@@ -4,7 +4,7 @@
 [tools]
 actionlint = "1.7.12"
 gitleaks = "8.30.1"
-prek = "0.5.0"
+prek = "0.5.3"
 python = "3.14.7"
 uv = "0.12.15"
 "pipx:reuse" = { version = "6.2.0", extras = "charset-normalizer", depends = ["python"] }
@@ -12,18 +12,10 @@ uv = "0.12.15"
 [settings]
 lockfile = true
 
-[tasks.ci]
-description = "Run the repository CI gate"
-run = "prek run --all-files"
-
+# Single prek leaf. `ci`/`lint`/`fmt` used to duplicate this command; they
+# were removed rather than kept as compatibility aliases (AGENTS.md: no
+# shims). Generated velnor-workflow CI does not call mise tasks (generic
+# profile, docker unit only).
 [tasks.test]
 description = "Run the repository test gate"
-run = "prek run --all-files"
-
-[tasks.lint]
-description = "Run the repository lint gate"
-run = "prek run --all-files"
-
-[tasks.fmt]
-description = "Run the repository formatting gate"
 run = "prek run --all-files"
