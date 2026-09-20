@@ -12,22 +12,10 @@ uv = "0.12.7"
 [settings]
 lockfile = true
 
-# `test` is the only leaf. `ci`/`lint`/`fmt` are depends-only aliases so
-# `mise run <name>` stays valid. Generated velnor-workflow CI does not call
-# these (generic profile, docker unit only). Do not list all four as
-# ci_tasks/check_profile tasks: each `mise run` is a separate process.
+# Single prek leaf. `ci`/`lint`/`fmt` used to duplicate this command; they
+# were removed rather than kept as compatibility aliases (AGENTS.md: no
+# shims). Generated velnor-workflow CI does not call mise tasks (generic
+# profile, docker unit only).
 [tasks.test]
 description = "Run the repository test gate"
 run = "prek run --all-files"
-
-[tasks.ci]
-description = "Depends-only alias of test"
-depends = ["test"]
-
-[tasks.lint]
-description = "Depends-only alias of test"
-depends = ["test"]
-
-[tasks.fmt]
-description = "Depends-only alias of test"
-depends = ["test"]
