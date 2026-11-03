@@ -4,5 +4,6 @@
 FROM construct
 
 USER 0
-COPY --chown=0:0 --chmod=0644 review/AGENTS.md /usr/local/share/jackin-agent-smith/AGENTS.md
+RUN --mount=type=bind,source=review,target=/mnt/review \
+    install -D -m 0644 -o root -g root /mnt/review/AGENTS.md /usr/local/share/jackin-agent-smith/AGENTS.md
 USER 1000

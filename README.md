@@ -7,7 +7,7 @@ Agent Smith is the code review role of jackin. It runs Codex in an OpenShell san
 | File | Purpose |
 |---|---|
 | `jackin.role.toml` | The role manifest (schema 1). It names the `Dockerfile`, the policy, and the `preflight` hook. The Docker capability is off. |
-| `Dockerfile` | The final stage starts `FROM construct`. A `COPY` layer installs the review instructions at `/usr/local/share/jackin-agent-smith/AGENTS.md`, owned by root. |
+| `Dockerfile` | The final stage starts `FROM construct`. A `RUN` layer installs the review instructions at `/usr/local/share/jackin-agent-smith/AGENTS.md`, owned by root. |
 | `policy.yaml` | A native OpenShell policy. Landlock is a hard requirement. Writes are allowed only under `/sandbox`, `/tmp`, and `/dev/null`. |
 | `hooks/preflight.sh` | Copies the review instructions to `/sandbox/.codex/AGENTS.md` before each Codex start. |
 | `review/AGENTS.md` | The review instructions for Codex. |
