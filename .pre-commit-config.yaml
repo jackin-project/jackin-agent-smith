@@ -4,21 +4,25 @@ repos:
       - id: gitleaks
         name: gitleaks
         language: system
-        entry: gitleaks dir --redact --no-banner .
-        pass_filenames: false
-        always_run: true
+        entry: sh -c 'for file; do gitleaks dir --redact --no-banner "$file" || exit 1; done' gitleaks
       - id: shellcheck
         name: shellcheck
         language: system
         entry: shellcheck
-        files: ^hooks/[^/]+\.sh$
+        files: ^(hooks|tests)/[^/]+\.sh$
       - id: shfmt
         name: shfmt
         language: system
         entry: shfmt -d -i 4 -ci
-        files: ^hooks/[^/]+\.sh$
+        files: ^(hooks|tests)/[^/]+\.sh$
       - id: hadolint
         name: hadolint
         language: system
         entry: hadolint
         files: ^Dockerfile$
+      - id: preflight-cases
+        name: preflight hook cases
+        language: system
+        entry: sh tests/preflight.sh
+        files: ^(hooks/preflight\.sh|tests/preflight\.sh)$
+        pass_filenames: false
