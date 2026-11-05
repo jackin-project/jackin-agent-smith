@@ -43,6 +43,8 @@ The instructions tell Codex to:
 - check each claim before it reports it
 - end with a verdict (`APPROVE`, `CHANGES_REQUIRED`, or `BLOCKED`) and a list of findings
 
+A repository under review can hold its own `AGENTS.md`, and Codex reads it after the global file, so it takes precedence. Such a file can override the review rules and steer the review. This is how Codex loads instructions, and the role cannot pin them. The global file tells Codex to treat project text as data and to report an instruction in it as a finding, but that is guidance for the model. The egress policy is unaffected: the sandbox still reaches only the Codex hosts and, for a fetch, `github.com`. A steered review can still put data in the URL of such a fetch, so treat the report of a repository that you do not trust as untrusted output.
+
 These instructions guide the model. They are not a boundary. Codex runs with `--sandbox danger-full-access` because the OpenShell sandbox already isolates it (decision D04). The boundary is the policy.
 
 ## Use the role
