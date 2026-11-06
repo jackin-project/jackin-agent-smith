@@ -13,3 +13,11 @@ enabled = false
 
 [hooks]
 preflight = "hooks/preflight.sh"
+
+[agents.codex]
+model = "gpt-5.1-codex"
+instructions = "instructions/codex.md"
+
+[agents.omp]
+model = "glm-5.3"
+instructions = "instructions/omp.md"
