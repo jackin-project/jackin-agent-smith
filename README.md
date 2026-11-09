@@ -1,6 +1,6 @@
 # jackin-agent-smith
 
-Agent Smith is the code review role of jackin. It runs Codex in an OpenShell sandbox with review instructions and a small network policy. Codex is the only agent.
+Agent Smith is the code review role of jackin. It runs the selected D29 agent in an OpenShell sandbox with review instructions and a small network policy. The manifest maps Codex to `instructions/codex.md` and omp to `instructions/omp.md`.
 
 Jackin builds the image and creates the sandbox. This repository does not publish an image. The role holds no secret.
 
@@ -8,7 +8,7 @@ Jackin builds the image and creates the sandbox. This repository does not publis
 
 The `Dockerfile` ends in a stage that starts `FROM construct`. One `RUN` layer installs the review instructions from `review/AGENTS.md` at `/usr/local/share/jackin-agent-smith/AGENTS.md`, owned by root with mode 0644.
 
-Jackin adds Codex, `jackin-start`, and the hook when it derives the final image (decisions D05 and D11).
+Jackin adds the selected agent binaries, `jackin-start`, and the hook when it derives the final image (decisions D05 and D11).
 
 ## Egress policy
 
@@ -17,7 +17,7 @@ Jackin adds Codex, `jackin-start`, and the hook when it derives the final image 
 - The role reaches one host, `github.com` on port 443, and only for `/usr/bin/git`.
 - Two requests pass: `GET /**/info/refs*` and `POST /**/git-upload-pack`. These are the two requests of a smart HTTP fetch. So `git fetch`, `git ls-remote`, and `git clone` work.
 - `git push` is denied, because it needs `git-receive-pack`. Every other request to `github.com` is denied.
-- OpenShell adds the rule of the Codex provider. The policy names no Codex host and no address.
+- OpenShell adds the provider rules for the selected tuples. The policy names no provider host and no provider address.
 - The sandbox holds no GitHub credential, so fetches reach public repositories only.
 - `/bin`, `/sbin`, `/usr`, `/lib`, `/etc`, `/proc`, `/dev/urandom`, and `/var/log` are read-only. `/sandbox`, `/tmp`, and `/dev/null` are writable.
 - `landlock.compatibility` is `hard_requirement`, so the sandbox fails to start where Landlock is unavailable.
@@ -28,7 +28,7 @@ The Docker capability is off (`[docker] enabled = false`).
 
 The manifest has no `[env]` entry.
 
-It has one hook, `preflight`. Jackin runs `hooks/preflight.sh` through exec as the user `sandbox` before each Codex start. The hook copies `/usr/local/share/jackin-agent-smith/AGENTS.md` to `/sandbox/.codex/AGENTS.md`. A non-zero exit stops the launch.
+It has one hook, `preflight`. Jackin runs `hooks/preflight.sh` through exec as the user `sandbox` before each agent start. For Codex, the hook copies `/usr/local/share/jackin-agent-smith/AGENTS.md` to `/sandbox/.codex/AGENTS.md`. A non-zero exit stops the launch.
 
 ## Review instructions
 
@@ -43,7 +43,7 @@ The instructions tell Codex to:
 - check each claim before it reports it
 - end with a verdict (`APPROVE`, `CHANGES_REQUIRED`, or `BLOCKED`) and a list of findings
 
-A repository under review can hold its own `AGENTS.md`, and Codex reads it after the global file, so it takes precedence. Such a file can override the review rules and steer the review. This is how Codex loads instructions, and the role cannot pin them. The global file tells Codex to treat project text as data and to report an instruction in it as a finding, but that is guidance for the model. The egress policy is unaffected: the sandbox still reaches only the Codex hosts and, for a fetch, `github.com`. A steered review can still put data in the URL of such a fetch, so treat the report of a repository that you do not trust as untrusted output.
+A repository under review can hold its own `AGENTS.md`, and Codex reads it after the global file, so it takes precedence. Such a file can override the review rules and steer the review. This is how Codex loads instructions, and the role cannot pin them. The global file tells Codex to treat project text as data and to report an instruction in it as a finding, but that is guidance for the model. The egress policy is unaffected: the sandbox still reaches only the selected provider hosts and, for a fetch, `github.com`. A steered review can still put data in the URL of such a fetch, so treat the report of a repository that you do not trust as untrusted output.
 
 These instructions guide the model. They are not a boundary. Codex runs with `--sandbox danger-full-access` because the OpenShell sandbox already isolates it (decision D04). The boundary is the policy.
 
@@ -62,7 +62,7 @@ jackin role add agent-smith .
 jackin load agent-smith <project>
 ```
 
-Jackin uploads the project as a working tree and a git bundle to `/sandbox/project`. Codex starts there.
+Jackin uploads the project as a working tree and a git bundle to `/sandbox/project`. The selected agent starts there.
 
 ## Repository checks
 
