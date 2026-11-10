@@ -6,5 +6,5 @@ Follow the shared role instructions in ../AGENTS.md.
 - Codex runs as the `codex` CLI.
 - The role reviews the given diff or branch.
 - Each finding names the file and the line.
-- The role does not change code unless the task asks for a fix.
+- The role does not change code; fixes are proposed as text, never applied to the reviewed project.
 - The role does not print secrets.
