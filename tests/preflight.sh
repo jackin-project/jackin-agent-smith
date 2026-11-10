@@ -25,6 +25,8 @@ mk() {
     printf '%s\n' "$master" >"$t/share/AGENTS.md"
     sed -e "s#/sandbox#$t/sandbox#g" -e "s#/usr/local/share/jackin-agent-smith#$t/share#g" "$hook" >"$t/preflight.sh"
     codex=$t/sandbox/.codex
+    omp_lead=$t/sandbox/.omp/agent
+    omp_secondary=$t/sandbox/.jackin/homes/omp/.omp/agent
 }
 
 run_hook() {
@@ -42,12 +44,16 @@ check() {
     fi
 }
 
-restored() {
-    if [ -f "$codex/AGENTS.md" ] && [ ! -L "$codex/AGENTS.md" ] && [ "$(cat "$codex/AGENTS.md")" = "$master" ]; then
+restored_at() {
+    if [ -f "$1/AGENTS.md" ] && [ ! -L "$1/AGENTS.md" ] && cmp -s "$1/AGENTS.md" "$t/share/AGENTS.md"; then
         echo restored
     else
         echo not-restored
     fi
+}
+
+restored() {
+    restored_at "$codex"
 }
 
 mk a_missing_file_is_installed
@@ -135,6 +141,73 @@ mk a_file_in_place_of_the_codex_directory_is_rejected
 : >"$codex"
 run_hook
 check a_file_in_place_of_the_codex_directory_is_rejected "$([ "$rc" -ne 0 ] && echo failed)" failed
+
+mk every_destination_is_installed
+run_hook
+check every_destination_is_installed "$rc $(restored_at "$codex") $(restored_at "$omp_lead") $(restored_at "$omp_secondary")" '0 restored restored restored'
+
+mk an_edited_destination_is_restored_on_rerun
+run_hook
+check an_edited_destination_is_installed "$rc $(restored_at "$codex") $(restored_at "$omp_lead") $(restored_at "$omp_secondary")" '0 restored restored restored'
+echo edited >"$codex/AGENTS.md"
+echo edited >"$omp_lead/AGENTS.md"
+echo edited >"$omp_secondary/AGENTS.md"
+run_hook
+check an_edited_destination_is_restored_on_rerun "$rc $(restored_at "$codex") $(restored_at "$omp_lead") $(restored_at "$omp_secondary")" '0 restored restored restored'
+
+mk a_symlinked_omp_destination_is_replaced_and_its_target_is_untouched
+mkdir -p "$omp_lead"
+echo target >"$t/target.txt"
+ln -s "$t/target.txt" "$omp_lead/AGENTS.md"
+run_hook
+check a_symlinked_omp_destination_is_replaced "$rc $(restored_at "$omp_lead")" '0 restored'
+check a_symlinked_omp_destination_leaves_its_target_untouched "$(cat "$t/target.txt")" target
+
+mk a_symlinked_omp_secondary_destination_is_replaced_and_its_target_is_untouched
+mkdir -p "$omp_secondary"
+echo target >"$t/target.txt"
+ln -s "$t/target.txt" "$omp_secondary/AGENTS.md"
+run_hook
+check a_symlinked_omp_secondary_destination_is_replaced "$rc $(restored_at "$omp_secondary")" '0 restored'
+check a_symlinked_omp_secondary_destination_leaves_its_target_untouched "$(cat "$t/target.txt")" target
+
+mk a_symlinked_omp_home_is_rejected_and_not_written_through
+mkdir -p "$t/sandbox/.omp" "$t/elsewhere"
+ln -s "$t/elsewhere" "$omp_lead"
+run_hook
+check a_symlinked_omp_home_is_rejected "$([ "$rc" -ne 0 ] && echo failed)" failed
+check a_symlinked_omp_home_is_not_written_through "$(find "$t/elsewhere" -mindepth 1 | wc -l | tr -d ' ')" 0
+
+mk a_symlinked_omp_secondary_home_is_rejected_and_not_written_through
+mkdir -p "$t/sandbox/.jackin/homes" "$t/elsewhere"
+ln -s "$t/elsewhere" "$t/sandbox/.jackin/homes/omp"
+run_hook
+check a_symlinked_omp_secondary_home_is_rejected "$([ "$rc" -ne 0 ] && echo failed)" failed
+check a_symlinked_omp_secondary_home_is_not_written_through "$(find "$t/elsewhere" -mindepth 1 | wc -l | tr -d ' ')" 0
+
+mk a_symlinked_omp_ancestor_is_rejected_and_not_written_through
+mkdir -p "$t/elsewhere"
+ln -s "$t/elsewhere" "$t/sandbox/.omp"
+run_hook
+check a_symlinked_omp_ancestor_is_rejected "$([ "$rc" -ne 0 ] && echo failed)" failed
+check a_symlinked_omp_ancestor_is_not_written_through "$(find "$t/elsewhere" -mindepth 1 | wc -l | tr -d ' ')" 0
+
+mk a_symlinked_omp_secondary_ancestor_is_rejected_and_not_written_through
+mkdir -p "$t/elsewhere"
+ln -s "$t/elsewhere" "$t/sandbox/.jackin"
+run_hook
+check a_symlinked_omp_secondary_ancestor_is_rejected "$([ "$rc" -ne 0 ] && echo failed)" failed
+check a_symlinked_omp_secondary_ancestor_is_not_written_through "$(find "$t/elsewhere" -mindepth 1 | wc -l | tr -d ' ')" 0
+
+mk a_directory_in_place_of_the_omp_destination_file_fails_closed
+mkdir -p "$omp_lead/AGENTS.md/inner"
+run_hook
+check a_directory_in_place_of_the_omp_destination_file_fails_closed "$([ "$rc" -ne 0 ] && [ -d "$omp_lead/AGENTS.md/inner" ] && echo failed)" failed
+
+mk a_directory_in_place_of_the_omp_secondary_destination_file_fails_closed
+mkdir -p "$omp_secondary/AGENTS.md/inner"
+run_hook
+check a_directory_in_place_of_the_omp_secondary_destination_file_fails_closed "$([ "$rc" -ne 0 ] && [ -d "$omp_secondary/AGENTS.md/inner" ] && echo failed)" failed
 
 echo "$total cases, $failures failed"
 [ "$failures" -eq 0 ]
