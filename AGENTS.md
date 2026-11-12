@@ -45,6 +45,6 @@ Keep this section identical in all four repositories. Write the rules for one re
 
 - Agent Smith is a Codex role for code review. Decision D20 in `jackin/rewrite/DESIGN.md` defines it.
 - The final stage of the `Dockerfile` starts `FROM construct`. Jackin builds the image. Do not publish the image from this repository.
-- The policy permits only the Codex hosts and `github.com`.
+- The effective policy permits only the provider hosts for the selected D29 tuples and `github.com` for Git fetches.
 - The gate is `jackin role check .` with the jackin binary from `jackin/target/debug/jackin`.
 - Do not put a secret in the role.
