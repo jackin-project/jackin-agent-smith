@@ -2,9 +2,10 @@
 .idea/
 .vscode/
 *.swp
-.DS_Store
+.env
 
 # Docker build context leftovers
 *.tar
 *.tar.gz
 .dockerignore.bak
+.DS_Store

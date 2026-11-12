@@ -3,24 +3,6 @@
   "extends": [
     "config:best-practices"
   ],
-  "packageRules": [
-    {
-      "matchDatasources": ["docker"],
-      "matchPackageNames": ["projectjackin/construct"],
-      "versioning": "regex:^(?<major>\\d+)\\.(?<minor>\\d+)-trixie$"
-    }
-  ],
-  "customManagers": [
-    {
-      "customType": "regex",
-      "managerFilePatterns": [
-        "/(^|/)Dockerfile$/"
-      ],
-      "matchStrings": ["ARG NODE_VERSION=(?<currentValue>[\\d.]+)"],
-      "datasourceTemplate": "node-version",
-      "packageNameTemplate": "node"
-    }
-  ],
   "prHourlyLimit": 0,
   "prConcurrentLimit": 20,
   "commitBody": "Signed-off-by: Renovate Bot <renovate@whitesourcesoftware.com>"

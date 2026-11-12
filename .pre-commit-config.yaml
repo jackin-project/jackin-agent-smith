@@ -1,14 +1,34 @@
 repos:
-  - repo: https://github.com/gitleaks/gitleaks
-    rev: v8.30.1
-    hooks:
-      - id: gitleaks
-
   - repo: local
     hooks:
-      - id: jackin-marketplace-audit
-        name: jackin.role.toml plugin marketplace audit
-        entry: scripts/marketplace-audit.sh
-        language: script
-        files: ^jackin\.role\.toml$
+      - id: gitleaks
+        name: gitleaks
+        language: system
+        entry: sh -c 'for file; do gitleaks dir --redact --no-banner -- "$file" || exit 1; done' gitleaks
+      - id: gitleaks-cases
+        name: staged gitleaks cases
+        language: system
+        entry: sh tests/gitleaks.sh
+        files: ^(.pre-commit-config.yaml|tests/gitleaks\.sh)$
+        pass_filenames: false
+      - id: shellcheck
+        name: shellcheck
+        language: system
+        entry: shellcheck
+        files: ^(hooks|tests)/[^/]+\.sh$
+      - id: shfmt
+        name: shfmt
+        language: system
+        entry: shfmt -d -i 4 -ci
+        files: ^(hooks|tests)/[^/]+\.sh$
+      - id: hadolint
+        name: hadolint
+        language: system
+        entry: hadolint
+        files: ^Dockerfile$
+      - id: preflight-cases
+        name: preflight hook cases
+        language: system
+        entry: sh tests/preflight.sh
+        files: ^(hooks/preflight\.sh|tests/preflight\.sh)$
         pass_filenames: false
