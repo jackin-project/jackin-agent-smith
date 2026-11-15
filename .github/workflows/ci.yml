@@ -300,9 +300,12 @@ jobs:
         if: ${{ always() && needs.required.result != 'success' }}
         run: env -u ACTIONS_ID_TOKEN_REQUEST_TOKEN -u ACTIONS_ID_TOKEN_REQUEST_URL -u ACTIONS_RUNTIME_TOKEN -u GITHUB_TOKEN -u MISE_GITHUB_TOKEN -u GH_TOKEN -u GH_HOST -u GH_CONFIG_DIR false
   task-test:
-    name: Verify test
-    runs-on: ubuntu-26.04
+    name: Verify test / Velnor Scale Set / Linux x64
+    runs-on: [velnor, ubuntu-26.04-scale-set]
     timeout-minutes: 10
+    defaults:
+      run:
+        shell: bash -e {0}
     env:
       RUSTUP_AUTO_INSTALL: "0"
       VELNOR_RUN_KEY_ATTEMPT: ${{ github.run_attempt }}
